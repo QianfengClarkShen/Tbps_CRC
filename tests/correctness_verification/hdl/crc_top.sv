@@ -128,9 +128,11 @@ module crc_top #(
             pkt_byte_cnt <= pkt_byte_cnt - DWIDTH/8;
         else if (start & ~done)
             pkt_byte_cnt <= rand16[15-:BYTE_BITS];
+        else
+            pkt_byte_cnt <= {BYTE_BITS{1'b0}};            
 
         flitEn <= pkt_byte_cnt != {BYTE_BITS{1'b0}};
-        dlast <= pkt_byte_cnt <= DWIDTH/8;
+        dlast <= pkt_byte_cnt <= DWIDTH/8 && pkt_byte_cnt != {BYTE_BITS{1'b0}};
     end    
 
     assign rst = ~start;

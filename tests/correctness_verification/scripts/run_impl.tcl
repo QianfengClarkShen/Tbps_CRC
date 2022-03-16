@@ -53,7 +53,7 @@ if {$BYTEEN} {
 }
 
 reset_run synth_1
-set_property -name {STEPS.SYNTH_DESIGN.ARGS.MORE OPTIONS} -value "-verilog_define DWIDTH=${DWIDTH} -verilog_define CRC_WIDTH=${CRC_WIDTH} -verilog_define PIPE_LVL=${PIPE_LVL} -verilog_define CRC_POLY=\"${CRC_POLY}\" -verilog_define INIT=\"${INIT}\" -verilog_define XOR_OUT=\"${XOR_OUT}\" -verilog_define REFIN=\"1'b${REFIN}\" -verilog_define REFOUT=\"1'b${REFOUT}\" -verilog_define PKT_LIMIT=${PKT_LIMIT} -verilog_define BYTE_BITS=${BYTE_BITS} -verilog_define dummy=\"'\"" -objects [get_runs synth_1]
+set_property -name {STEPS.SYNTH_DESIGN.ARGS.MORE OPTIONS} -value "-verilog_define DWIDTH=${DWIDTH} -verilog_define CRC_WIDTH=${CRC_WIDTH} -verilog_define PIPE_LVL=${PIPE_LVL} -verilog_define CRC_POLY=${CRC_POLY} -verilog_define INIT=${INIT} -verilog_define XOR_OUT=${XOR_OUT} -verilog_define REFIN=1'b${REFIN} -verilog_define REFOUT=1'b${REFOUT} -verilog_define PKT_LIMIT=${PKT_LIMIT} -verilog_define BYTE_BITS=${BYTE_BITS}" -objects [get_runs synth_1]
 
 launch_runs synth_1 -jobs 8
 wait_on_run synth_1
