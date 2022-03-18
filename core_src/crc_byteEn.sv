@@ -29,6 +29,7 @@ module crc_gen_byteEn #
     localparam bit [CRC_WIDTH-1:0][CRC_WIDTH-1:0] CRC_TABLE = gen_crc_table(UNI_TABLE);
     localparam bit [CRC_WIDTH-1:0][DWIDTH-1:0] DATA_TABLE = gen_data_table(UNI_TABLE);
     localparam int DIV_PER_LVL = get_div_per_lvl();
+    localparam int N_LAST_LVL = get_n_last_lvl();
     localparam bit [PIPE_LVL:0][31:0] N_TERMS = get_n_terms(DIV_PER_LVL);
     localparam bit [$clog2(DWIDTH/8)-1:0][CRC_WIDTH-1:0][CRC_WIDTH-1:0] REVERT_TABLE = get_revert_table();
 
@@ -113,7 +114,8 @@ module crc_gen_byteEn #
                 if (CRC_TABLE[i][j])
                     crc_int[i] = crc_int[i] ^ crc_previous[j];
             end
-            crc_int[i] = crc_int[i] ^ data_pipe[PIPE_LVL][i][0];
+            for (int j = 0; j < N_LAST_LVL; j++)
+                crc_int[i] = crc_int[i] ^ data_pipe[PIPE_LVL][i][j];
         end        
     end
 

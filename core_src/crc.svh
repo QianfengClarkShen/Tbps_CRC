@@ -43,17 +43,56 @@ endfunction
 
 function int get_div_per_lvl();
     int divider_per_lvl;
-    if (PIPE_LVL <= 1)
+    int n_last_lvl;
+    int j;
+    if (PIPE_LVL == 0)
         divider_per_lvl = DWIDTH;
     else begin
-        for (int j = 0; j < 100; j++) begin
-            if (j**PIPE_LVL >= DWIDTH) begin
-                divider_per_lvl = j;
+        j = 0;
+        n_last_lvl = 1;
+        while (1) begin
+            while (1) begin
+                if (n_last_lvl*(j**PIPE_LVL) >= DWIDTH)
+                    break;
+                else
+                    j++;
+            end
+            if (n_last_lvl+CRC_WIDTH >= j)
                 break;
+            else begin
+                n_last_lvl++;
+                j = 0;
             end
         end
+        divider_per_lvl = j;
     end
     return divider_per_lvl;
+endfunction
+
+function int get_n_last_lvl();
+    int divider_per_lvl;
+    int n_last_lvl;
+    int j;
+    n_last_lvl = 1;
+    if (PIPE_LVL != 0) begin
+        j = 0;
+        while (1) begin
+            while (1) begin
+                if (n_last_lvl*(j**PIPE_LVL) >= DWIDTH)
+                    break;
+                else
+                    j++;
+            end
+            if (n_last_lvl+CRC_WIDTH >= j)
+                break;
+            else begin
+                n_last_lvl++;
+                j = 0;
+            end
+        end
+        divider_per_lvl = j;
+    end
+    return n_last_lvl;
 endfunction
 
 function bit [PIPE_LVL:0][31:0] get_n_terms(

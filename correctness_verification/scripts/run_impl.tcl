@@ -22,10 +22,10 @@ if {$BYTEEN} {
                             "${root_dir}/hdl/xoshiro128ss_simple.sv" \
                             "${root_dir}/hdl/xoshiro32pp_simple.sv" \
                             "${root_dir}/hdl/config.svh" \
-                            "${root_dir}/../../core_src/crc_byteEn.sv" \
-                            "${root_dir}/../../core_src/crc.svh"
+                            "${root_dir}/../core_src/crc_byteEn.sv" \
+                            "${root_dir}/../core_src/crc.svh"
     ]
-    add_files -fileset constrs_1 "${root_dir}/../board_clk_source.xdc"
+    add_files -fileset constrs_1 "${root_dir}/board_clk_source.xdc"
     set top_rtl "crc_byteEn_top"
 } else {
     set project_name "tbps_crc_implementation"
@@ -34,10 +34,10 @@ if {$BYTEEN} {
                             "${root_dir}/hdl/xoshiro128ss_simple.sv" \
                             "${root_dir}/hdl/xoshiro32pp_simple.sv" \
                             "${root_dir}/hdl/config.svh" \
-                            "${root_dir}/../../core_src/crc.sv" \
-                            "${root_dir}/../../core_src/crc.svh"
+                            "${root_dir}/../core_src/crc.sv" \
+                            "${root_dir}/../core_src/crc.svh"
     ]
-    add_files -fileset constrs_1 "${root_dir}/../board_clk_source.xdc"
+    add_files -fileset constrs_1 "${root_dir}/board_clk_source.xdc"
     set top_rtl "crc_top"
 }
 

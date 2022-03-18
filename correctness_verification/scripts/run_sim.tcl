@@ -22,8 +22,8 @@ if {$BYTEEN} {
     add_files -fileset sim_1 -norecurse [list "${root_dir}/hdl/crc_byteEn_tb.sv" \
                             "${root_dir}/hdl/crc_byteEn_top.sv" \
                             "${root_dir}/hdl/config.svh" \
-                            "${root_dir}/../../core_src/crc_byteEn.sv" \
-                            "${root_dir}/../../core_src/crc.svh"
+                            "${root_dir}/../core_src/crc_byteEn.sv" \
+                            "${root_dir}/../core_src/crc.svh"
     ]
     set top_rtl "crc_byteEn_tb"
 } else {
@@ -31,8 +31,8 @@ if {$BYTEEN} {
     add_files -fileset sim_1 -norecurse [list "${root_dir}/hdl/crc_tb.sv" \
                             "${root_dir}/hdl/crc_top.sv" \
                             "${root_dir}/hdl/config.svh" \
-                            "${root_dir}/../../core_src/crc.sv" \
-                            "${root_dir}/../../core_src/crc.svh"
+                            "${root_dir}/../core_src/crc.sv" \
+                            "${root_dir}/../core_src/crc.svh"
     ]
     set top_rtl "crc_tb"
 }
