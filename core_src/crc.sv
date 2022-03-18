@@ -19,9 +19,6 @@ module crc_gen #
     (* keep = "true" *) output logic [CRC_WIDTH-1:0] crc_out = {CRC_WIDTH{1'b0}},
     (* keep = "true" *) output logic crc_out_vld = 1'b0
 );
-    generate
-        if (DWIDTH % 8 != 0) $fatal(0,"DWIDTH has to be a multiple of 8");
-    endgenerate
     `include "crc.svh"
     localparam bit [CRC_WIDTH-1:0][CRC_WIDTH+DWIDTH-1:0] UNI_TABLE = gen_unified_table();
     localparam bit [CRC_WIDTH-1:0][CRC_WIDTH-1:0] CRC_TABLE = gen_crc_table(UNI_TABLE);
