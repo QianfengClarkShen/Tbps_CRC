@@ -1,3 +1,15 @@
+/**
+Copyright (c) 2022, Qianfeng (Clark) Shen
+All rights reserved.
+
+This source code is licensed under the BSD-style license found in the
+LICENSE file in the root directory of this source tree. 
+ * @author Qianfeng (Clark) Shen
+ * @email qianfeng.shen@gmail.com
+ * @create date 2022-03-18 13:57:54
+ * @modify date 2022-03-18 13:57:54
+ */
+
 function bit [CRC_WIDTH-1:0][DWIDTH+CRC_WIDTH-1:0] gen_unified_table();
     static bit [CRC_WIDTH-1:0][DWIDTH+CRC_WIDTH-1:0] table_old = {CRC_WIDTH{{(DWIDTH+CRC_WIDTH){1'b0}}}};
     static bit [CRC_WIDTH-1:0][DWIDTH+CRC_WIDTH-1:0] unified_table = {CRC_WIDTH{{(DWIDTH+CRC_WIDTH){1'b0}}}};
