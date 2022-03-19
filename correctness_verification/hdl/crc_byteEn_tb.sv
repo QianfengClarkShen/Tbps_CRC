@@ -157,8 +157,8 @@ module crc_byteEn_tb();
                 if (crc_out != crc_sw_out_fifo[i]) begin
                     sim_exit = 1;
                     for (int j = 0; j < i; j++)
-                        $display("Message #%0d: SW CRC result= %0d'h%s, HW CRC result= %0d'h%s, results matched", j, CRC_WIDTH, hex_str(crc_sw_out_fifo[j]), CRC_WIDTH, hex_str(crc_sw_out_fifo[j]));
-                    $display("Message #%0d: SW CRC result= %0d'h%s, HW CRC result= %0d'h%s, results did not match", i, CRC_WIDTH, hex_str(crc_sw_out_fifo[i]), CRC_WIDTH, hex_str(crc_out));
+                        $display("Message #%0d: SW CRC result = %0d'h%s, HW CRC result = %0d'h%s, results matched", j, CRC_WIDTH, hex_str(crc_sw_out_fifo[j]), CRC_WIDTH, hex_str(crc_sw_out_fifo[j]));
+                    $display("Message #%0d: SW CRC result = %0d'h%s, HW CRC result = %0d'h%s, results did not match", i, CRC_WIDTH, hex_str(crc_sw_out_fifo[i]), CRC_WIDTH, hex_str(crc_out));
                     $display("CRC results did not match for message #%0d, test FAILED", i);
                     repeat(10) @(posedge clk);
                     $finish;
@@ -169,7 +169,7 @@ module crc_byteEn_tb();
         end
 
         for (int i = 0; i < N_MESSAGE; i++) begin
-            $display("Message #%0d: SW CRC result= %0d'h%s, HW CRC result= %0d'h%s, results matched", i, CRC_WIDTH, hex_str(crc_sw_out_fifo[i]), CRC_WIDTH, hex_str(crc_sw_out_fifo[i]));
+            $display("Message #%0d: SW CRC result = %0d'h%s, HW CRC result = %0d'h%s, results matched", i, CRC_WIDTH, hex_str(crc_sw_out_fifo[i]), CRC_WIDTH, hex_str(crc_sw_out_fifo[i]));
         end
         $display("All CRC results matched, test PASSED for %m");
         repeat(50) @(posedge clk);

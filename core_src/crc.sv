@@ -36,8 +36,8 @@ module crc_gen #
     localparam bit [CRC_WIDTH-1:0][CRC_WIDTH-1:0] CRC_TABLE = gen_crc_table(UNI_TABLE);
     localparam bit [CRC_WIDTH-1:0][DWIDTH-1:0] DATA_TABLE = gen_data_table(UNI_TABLE);
     localparam int DIV_PER_LVL = get_div_per_lvl();
-    localparam int N_LAST_LVL = get_n_last_lvl();
     localparam bit [PIPE_LVL:0][31:0] N_TERMS = get_n_terms(DIV_PER_LVL);
+    localparam bit [PIPE_LVL:0][CRC_WIDTH-1:0][(DWIDTH-1)/DIV_PER_LVL:0] BRANCH_ENABLE_TABLE = get_branch_enable_table(DATA_TABLE,DIV_PER_LVL,N_TERMS);
 
     //input registers
     logic [PIPE_LVL:0] dlast_reg = {(PIPE_LVL+1){1'b0}};
@@ -52,7 +52,7 @@ module crc_gen #
 
     //pipeline logic
     logic [PIPE_LVL:0][CRC_WIDTH-1:0][(DWIDTH-1)/DIV_PER_LVL:0] data_pipe;
-    logic [PIPE_LVL:0][CRC_WIDTH-1:0][(DWIDTH-1)/DIV_PER_LVL:0] data_pipe_reg = {(PIPE_LVL+1){{CRC_WIDTH{{(DWIDTH/DIV_PER_LVL){1'b0}}}}}};
+    logic [PIPE_LVL:0][CRC_WIDTH-1:0][(DWIDTH-1)/DIV_PER_LVL:0] data_pipe_reg = {(PIPE_LVL+1){{CRC_WIDTH{{((DWIDTH-1)/DIV_PER_LVL+1){1'b0}}}}}};
 
     //crc feedback
     (* keep = "true" *) logic [CRC_WIDTH-1:0] crc_previous = INIT;
@@ -67,14 +67,12 @@ module crc_gen #
             din_refin = din;
 
     //generate the first level
-        data_pipe = {(PIPE_LVL+1){{CRC_WIDTH{{(DWIDTH/DIV_PER_LVL){1'b0}}}}}};
+        data_pipe = {(PIPE_LVL+1){{CRC_WIDTH{{((DWIDTH-1)/DIV_PER_LVL+1){1'b0}}}}}};
         for (int i = 0; i < CRC_WIDTH; i++) begin
-            for (int j = 0, int k = 0; j < DWIDTH/DIV_PER_LVL; j++) begin
-                for (int m = 0; m < DIV_PER_LVL && k < DWIDTH; k++) begin
-                    if (DATA_TABLE[i][k]) begin
-                        data_pipe[0][i][j] = data_pipe[0][i][j] ^ din_refin[k];
-                        m = m + 1;
-                    end
+            for (int j = 0; j < (DWIDTH-1)/DIV_PER_LVL+1; j++) begin
+                for (int k = 0; k < DIV_PER_LVL && j*DIV_PER_LVL+k < DWIDTH; k++) begin
+                    if (DATA_TABLE[i][j*DIV_PER_LVL+k])
+                        data_pipe[0][i][j] = data_pipe[0][i][j] ^ din_refin[j*DIV_PER_LVL+k];
                 end
             end
         end
@@ -82,8 +80,10 @@ module crc_gen #
         for (int i = 1; i <= PIPE_LVL; i++) begin
             for (int j = 0; j < CRC_WIDTH; j++) begin
                 for (int k = 0; k < (N_TERMS[i]-1)/DIV_PER_LVL+1; k++) begin
-                    for (int m = k*DIV_PER_LVL; m < (k+1)*DIV_PER_LVL && m < N_TERMS[i]; m++)
-                        data_pipe[i][j][k] = data_pipe[i][j][k] ^ data_pipe_reg[i-1][j][m];
+                    for (int m = k*DIV_PER_LVL; m < (k+1)*DIV_PER_LVL && m < N_TERMS[i]; m++) begin
+                        if (BRANCH_ENABLE_TABLE[i-1][j][m])
+                            data_pipe[i][j][k] = data_pipe[i][j][k] ^ data_pipe_reg[i-1][j][m];
+                    end
                 end
             end
         end
@@ -94,16 +94,17 @@ module crc_gen #
                 if (CRC_TABLE[i][j])
                     crc_int[i] = crc_int[i] ^ crc_previous[j];
             end
-            for (int j = 0; j < N_LAST_LVL; j++)
-                crc_int[i] = crc_int[i] ^ data_pipe[PIPE_LVL][i][j];
+            crc_int[i] = crc_int[i] ^ data_pipe[PIPE_LVL][i][0];
         end        
     end
 
     always_ff @(posedge clk) begin
         for (int i = 0; i < PIPE_LVL; i++) begin
             for (int j = 0; j < CRC_WIDTH; j++) begin
-                for (int k = 0; k < N_TERMS[i+1]; k++)
-                    data_pipe_reg[i][j][k] <= data_pipe[i][j][k];
+                for (int k = 0; k < N_TERMS[i+1]; k++) begin
+                    if (BRANCH_ENABLE_TABLE[i][j][k])
+                        data_pipe_reg[i][j][k] <= data_pipe[i][j][k];
+                end
             end
         end
     end
