@@ -6,7 +6,7 @@ PART_NUM="xcu250-figd2104-2L-e"  #the part number of the target fpga
 # general setup
 DWIDTH="512"             #data width
 CRC_WIDTH="32"           #crc polynomial width
-PIPE_LVL="0"             #pipeline level for crc calculation, deeper pipeline increases overall latency and area, but results in better fmax/throughput
+PIPE_LVL="2"             #pipeline level for crc calculation, deeper pipeline increases overall latency and area, but results in better fmax/throughput
 CRC_POLY="32'h04C11DB7"  #crc polynomial
 INIT="32'hffffffff"      #init hex
 XOR_OUT="32'hffffffff"   #xor out hex

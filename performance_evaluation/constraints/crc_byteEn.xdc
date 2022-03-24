@@ -13,9 +13,10 @@ set_false_path -from [get_ports flitEn]
 set_false_path -to [get_ports crc_out[*]]
 set_false_path -to [get_ports crc_out_vld]
 
-#restrict the area for the crc module
-create_pblock pr_region
-resize_pblock pr_region -add {CLOCKREGION_X2Y5:CLOCKREGION_X2Y5}
-add_cells_to_pblock pr_region [get_cells u_crc_gen]
+#restrict the place and route area for the crc module
+create_pblock crc_region
+resize_pblock crc_region -add {CLOCKREGION_X2Y5:CLOCKREGION_X2Y5}
+add_cells_to_pblock crc_region [get_cells u_crc_gen]
+set_property SNAPPING_MODE ON [get_pblocks crc_region]
 #assign a real clock buffer source to clk, so that clock skew can be realistically calculated
 set_property HD.CLK_SRC BUFGCE_X0Y133 [get_ports clk]

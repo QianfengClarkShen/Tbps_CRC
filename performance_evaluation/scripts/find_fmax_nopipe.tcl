@@ -8,6 +8,7 @@ set freq_xdc "${root_dir}/constraints/freq.xdc"
 
 set result_dir ${root_dir}/outputs/fmax_results
 set log_dir ${result_dir}/logs
+set dcp_dir ${result_dir}/dcps
 
 if {$byteEn} {
     set result_csv $result_dir/result_byteEn.csv
@@ -26,7 +27,7 @@ if {$byteEn} {
     set top_rtl "crc_top"
 }
 
-foreach name {"CRC5-USB" "CRC8-Bluetooth" "CRC10-CDMA2000" "CRC16-IBM" "CRC32-Ethernet" "CRC-64-ECMA"} poly {"5'h05" "8'hA7" "10'h3D9" "16'h8005" "32'h04C11DB7" "64'h42F0E1EBA9EA3693"} crc_wdith {5 8 10 16 32 64} init_hex {"5'b0" "8'b0" "10'b0" "16'b0" "32'hffffffff" "64'b0"} xorout {"5'b0" "8'b0" "10'b0" "16'b0" "32'hffffffff" "64'b0"} refin {"1'b0" "1'b0" "1'b0" "1'b0" "1'b1" "1'b0"} refout {"1'b0" "1'b0" "1'b0" "1'b0" "1'b1" "1'b0"} {
+foreach name {"CRC5-USB" "CRC8-Bluetooth" "CRC10-CDMA2000" "CRC16-IBM" "CRC32-Ethernet" "CRC64-ECMA"} poly {"5'h05" "8'hA7" "10'h3D9" "16'h8005" "32'h04C11DB7" "64'h42F0E1EBA9EA3693"} crc_width {5 8 10 16 32 64} init_hex {"5'b0" "8'b0" "10'b0" "16'b0" "32'hffffffff" "64'b0"} xorout {"5'b0" "8'b0" "10'b0" "16'b0" "32'hffffffff" "64'b0"} refin {"1'b0" "1'b0" "1'b0" "1'b0" "1'b1" "1'b0"} refout {"1'b0" "1'b0" "1'b0" "1'b0" "1'b1" "1'b0"} {
     set fmin 300
     set fmax 500
     foreach bus_width {64 128 256 512 1024} {
@@ -64,7 +65,7 @@ foreach name {"CRC5-USB" "CRC8-Bluetooth" "CRC10-CDMA2000" "CRC16-IBM" "CRC32-Et
 
             synth_design -mode out_of_context -top $top_rtl -part $part_num \
                                       -verilog_define DWIDTH=$bus_width \
-                                      -verilog_define CRC_WIDTH=$crc_wdith \
+                                      -verilog_define CRC_WIDTH=$crc_width \
                                       -verilog_define PIPE_LVL=0 \
                                       -verilog_define CRC_POLY=$poly \
                                       -verilog_define INIT=$init_hex \
@@ -73,7 +74,10 @@ foreach name {"CRC5-USB" "CRC8-Bluetooth" "CRC10-CDMA2000" "CRC16-IBM" "CRC32-Et
                                       -verilog_define REFOUT=$refout >> ${work_dir}/${file_prefix}run_fmax.log
             opt_design >> ${work_dir}/${file_prefix}run_fmax.log
             place_design >> ${work_dir}/${file_prefix}run_fmax.log
+            phys_opt_design >> ${work_dir}/${file_prefix}run_fmax.log
             route_design >> ${work_dir}/${file_prefix}run_fmax.log
+            phys_opt_design >> ${work_dir}/${file_prefix}run_fmax.log
+            write_checkpoint -force ${dcp_dir}/${file_prefix}${name}_${bus_width}_${freq}.dcp
 
             set timing_log [report_timing_summary -setup -nworst 1 -return_string]
             if {[regexp {(VIOLATED)} $timing_log]} {

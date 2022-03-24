@@ -4,9 +4,11 @@ set byteEn [lindex $argv 1]
 set script_dir [file dirname [file normalize [info script]]]
 set root_dir [file dirname [file dirname [file normalize [info script]]]]
 set work_dir "${root_dir}/workdir"
+set freq_xdc "${root_dir}/constraints/freq.xdc"
 
 set result_dir ${root_dir}/outputs/pipe_lvl_results
 set log_dir ${result_dir}/logs
+set dcp_dir ${result_dir}/dcps
 
 set freq_xdc_f [open "$root_dir/constraints/freq_pipe.xdc" w]
 puts $freq_xdc_f "create_clock -period 2.000 \[get_ports clk\]"
@@ -33,8 +35,8 @@ proc timeout_warning {} {
     puts "routing timeout, skipping"
 }
 
-foreach name {"CRC5-USB" "CRC8-Bluetooth" "CRC10-CDMA2000" "CRC16-IBM" "CRC32-Ethernet" "CRC-64-ECMA"} poly {"5'h05" "8'hA7" "10'h3D9" "16'h8005" "32'h04C11DB7" "64'h42F0E1EBA9EA3693"} crc_wdith {5 8 10 16 32 64} init_hex {"5'b0" "8'b0" "10'b0" "16'b0" "32'hffffffff" "64'b0"} xorout {"5'b0" "8'b0" "10'b0" "16'b0" "32'hffffffff" "64'b0"} refin {"1'b0" "1'b0" "1'b0" "1'b0" "1'b1" "1'b0"} refout {"1'b0" "1'b0" "1'b0" "1'b0" "1'b1" "1'b0"} {
-    set pipe_lvl 0
+foreach name {"CRC5-USB" "CRC8-Bluetooth" "CRC10-CDMA2000" "CRC16-IBM" "CRC32-Ethernet" "CRC64-ECMA"} poly {"5'h05" "8'hA7" "10'h3D9" "16'h8005" "32'h04C11DB7" "64'h42F0E1EBA9EA3693"} crc_width {5 8 10 16 32 64} init_hex {"5'b0" "8'b0" "10'b0" "16'b0" "32'hffffffff" "64'b0"} xorout {"5'b0" "8'b0" "10'b0" "16'b0" "32'hffffffff" "64'b0"} refin {"1'b0" "1'b0" "1'b0" "1'b0" "1'b1" "1'b0"} refout {"1'b0" "1'b0" "1'b0" "1'b0" "1'b1" "1'b0"} {
+    set pipe_lvl 1
     foreach bus_width {4096} {
         puts "run poly: $name, bus width: $bus_width"
         set slack_met 0
@@ -63,18 +65,24 @@ foreach name {"CRC5-USB" "CRC8-Bluetooth" "CRC10-CDMA2000" "CRC16-IBM" "CRC32-Et
 
             synth_design -mode out_of_context -top $top_rtl -part $part_num \
                                       -verilog_define DWIDTH=$bus_width \
-                                      -verilog_define CRC_WIDTH=$crc_wdith \
+                                      -verilog_define CRC_WIDTH=$crc_width \
                                       -verilog_define PIPE_LVL=$pipe_lvl \
                                       -verilog_define CRC_POLY=$poly \
                                       -verilog_define INIT=$init_hex \
                                       -verilog_define XOR_OUT=$xorout \
                                       -verilog_define REFIN=$refin \
                                       -verilog_define REFOUT=$refout >> ${work_dir}/${file_prefix}run_pipe.log
+            if {$pipe_lvl > 0} {
+                resize_pblock crc_region -add {CLOCKREGION_X3Y5:CLOCKREGION_X3Y5}
+            }
             opt_design >> ${work_dir}/${file_prefix}run_pipe.log
             place_design >> ${work_dir}/${file_prefix}run_pipe.log
+            phys_opt_design >> ${work_dir}/${file_prefix}run_pipe.log
             after 1800000 timeout_warning continue
             route_design >> ${work_dir}/${file_prefix}run_pipe.log
             after cancel timeout_warning continue
+            phys_opt_design >> ${work_dir}/${file_prefix}run_pipe.log
+            write_checkpoint -force ${dcp_dir}/${file_prefix}${name}_${bus_width}_${pipe_lvl}.dcp
             set timing_log [report_timing_summary -setup -nworst 1 -return_string]
             if {[regexp {(VIOLATED)} $timing_log]} {
                 set slack_met 0
