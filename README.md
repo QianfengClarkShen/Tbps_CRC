@@ -24,4 +24,6 @@ The performance test is under directory `performance_evaluation`. Same as the co
 
 `make find_pipe_lvl_500mhz` and `make find_pipe_lvl_500mhz_byteEn` find the minimum pipeline level implementation that can run at 500 MHz for different CRC polynomials.
 
+The summarized results can be found under /performance_evaluation/outputs.
+
 **The default configuration of the test is based on Xilinx's Alveo U250. User should modify the `config.mk` and the files under `constraints` for a different target board.**
