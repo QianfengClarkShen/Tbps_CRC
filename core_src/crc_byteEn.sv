@@ -147,12 +147,6 @@ module crc_gen_byteEn #
         for (int i = 0; i < DWIDTH/8; i++) begin
             crc_rev_en_pipe_wire = crc_rev_en_pipe_wire + {~byteEn[i]};
         end
-/*
-        for (int i = 0; i < $clog2(DWIDTH/8); i++) begin
-            for (int j = 0; j < 2**i; j++)
-                crc_rev_en_pipe_wire[i] = crc_rev_en_pipe_wire[i] | (~byteEn[DWIDTH/8-1-DWIDTH/8/2**(i+1)-j*(DWIDTH/8/2**i)] & byteEn[DWIDTH/8-1-j*(DWIDTH/8/2**i)]);
-        end
-*/
     end
     always_ff @(posedge clk) begin
         crc_rev_en_pipe_reg[0] <= {<<{crc_rev_en_pipe_wire}};
