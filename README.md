@@ -42,7 +42,9 @@ python run_test.py --DWIDTH=512 --PIPE_LVL=0 --CRC_NAME="crc-32"
 For testing a wide variety of CRC polynomials with different configurations, simply run:
 ```bash
 cd sim
-pytest
+mkdir build && cd build
+cmake ..
+make pytest
 ```
 
 The test framework supports:

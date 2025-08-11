@@ -1,5 +1,6 @@
 from ast import parse
 import itertools
+from math import log
 import os
 import argparse
 from pathlib import Path
@@ -132,11 +133,11 @@ async def unit_test(dut):
     await Timer(100, units="ns")
     dut._log.info("Test Finished")
 
-@pytest.mark.parametrize("DWIDTH", [32,128,512,768])
-@pytest.mark.parametrize("PIPE_LVL", [0,1])
 @pytest.mark.parametrize("REV_PIPE_EN_ONEHOT", [0,0xffffffff])
+@pytest.mark.parametrize("PIPE_LVL", [0,1])
+@pytest.mark.parametrize("DWIDTH", [32,128,512,768])
 @pytest.mark.parametrize("CRC_NAME", [crc['name'] for crc in crcmod.predefined._crc_definitions])
-def test_runner(DWIDTH, PIPE_LVL, REV_PIPE_EN_ONEHOT, CRC_NAME):
+def test_runner(CRC_NAME, DWIDTH, PIPE_LVL, REV_PIPE_EN_ONEHOT):
     sim = os.getenv("SIM", "verilator")
 
     sim_path = Path(__file__).resolve().parent
@@ -175,22 +176,24 @@ def test_runner(DWIDTH, PIPE_LVL, REV_PIPE_EN_ONEHOT, CRC_NAME):
 
     runner = get_runner(sim)
 
+    build_dir = Path(f"{CRC_NAME}-{DWIDTH}-{PIPE_LVL}-{REV_PIPE_EN_ONEHOT}")
     runner.build(
         hdl_toplevel=TOP_MODULE,
         verilog_sources=verilog_sources,
         includes=[proj_path],
         parameters=parameters,
         waves=True,
-        build_args=["-Wno-WIDTHCONCAT","-Wno-WIDTHEXPAND","-Wno-UNOPTFLAT","+1800-2012ext+sv"],
-        build_dir=f"sim_{CRC_NAME}_{DWIDTH}_{PIPE_LVL}_{REV_PIPE_EN_ONEHOT}",
-        always=True
+        build_args=["-Wno-WIDTHEXPAND","-Wno-UNOPTFLAT","+1800-2012ext+sv"],
+        build_dir=build_dir,
+        log_file=build_dir / "build.log"
     )
 
     runner.test(
         hdl_toplevel=TOP_MODULE,
         hdl_toplevel_lang="verilog",
         waves=True,
-        test_module=module_name
+        test_module=module_name,
+        log_file=build_dir / "sim.log"
     )
 
 if cocotb.SIM_NAME:
