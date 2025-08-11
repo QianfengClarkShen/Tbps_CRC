@@ -4,3 +4,4 @@ dvt_build.log
 sim/*
 !sim/run_test.py
 !sim/tb.sv
+!sim/CMakeLists.txt
